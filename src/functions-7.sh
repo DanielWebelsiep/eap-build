@@ -41,15 +41,18 @@ function prepare_eap_source {
 function prepare_core_source {
     CORE_VERSION=$(get_module_version org.wildfly.core)
     CORE_FULL_SOURCE_VERSION=$(grep "$CORE_VERSION=" src/jboss-eap-7.properties | cut -d '=' -f 2)
+    MAVEN_REPO=https://maven.repository.redhat.com/earlyaccess
 
     if [ -z "$CORE_FULL_SOURCE_VERSION" ]
     then
-        download_and_unzip http://ftp.redhat.com/redhat/jboss/eap/$EAP_VERSION/en/source/jboss-eap-$EAP_VERSION-core-src.zip
+        download_and_unzip http://ftp.redhat.com/redhat/jboss/eap/7.3.0/en/source/jboss-eap-7.3.0-core-src.zip
         mv $BUILD_HOME/work/jboss-eap-7.3-core-src $BUILD_HOME/work/wildfly-core-$CORE_VERSION
 
+        cp $BUILD_HOME/work/wildfly-core-$CORE_VERSION/checkstyle-suppressions.xml $BUILD_HOME/work/wildfly-core-$CORE_VERSION/core-feature-pack/
+
         cd $BUILD_HOME/work/wildfly-core-$CORE_VERSION/core-feature-pack
+        wget --output-file=$BUILD_HOME/work/build.log $MAVEN_REPO/org/wildfly/core/wildfly-core-feature-pack/$CORE_VERSION/wildfly-core-feature-pack-$CORE_VERSION.pom -O pom.xml
     else
-        MAVEN_REPO=https://maven.repository.redhat.com/earlyaccess
         if [[ $CORE_FULL_SOURCE_VERSION = *"-redhat-"* ]]
         then
             download_and_unzip $MAVEN_REPO/org/wildfly/core/wildfly-core-parent/$CORE_FULL_SOURCE_VERSION/wildfly-core-parent-$CORE_FULL_SOURCE_VERSION-project-sources.tar.gz
